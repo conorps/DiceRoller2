@@ -1,12 +1,18 @@
 package com.stephens.diceroller.main
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.stephens.diceroller.api.RandomApi
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlin.random.Random
-import kotlin.random.nextInt
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor (
+    private val api: RandomApi
+) : ViewModel() {
     private var state = MainState()
         private set(value) {
             field = value
@@ -17,13 +23,40 @@ class MainViewModel : ViewModel() {
 
     fun postAction(action: MainAction) {
         when(action) {
-            MainAction.TapRoll -> rollDie()
+            MainAction.TapRoll ->
+                rollDice(
+                    valuesToReturn = 1,
+                    min = 1,
+                    max = 6
+            )
+            MainAction.ClearErrors ->
+                state = state.copy(
+                networkError = false
+            )
         }
     }
 
-    private fun rollDie() {
-        state = state.copy(result = 0)
-        val result = Random.nextInt(0..6)
-        state = state.copy(result = result)
+    private fun rollDice(
+        valuesToReturn: Int,
+        min: Int,
+        max: Int
+    ) {
+        viewModelScope.launch {
+            state = state.copy(loading = true)
+            val response = api.getRandomNumber(
+                num = valuesToReturn.toString(),
+                min = min.toString(),
+                max = max.toString()
+            )
+            if (response.isSuccessful) {
+                state = state.copy(
+                    result = response.body() ?: 0,
+                    loading = false)
+            } else {
+                state = state.copy(
+                    networkError = true,
+                    loading = false)
+            }
+        }
     }
 }
