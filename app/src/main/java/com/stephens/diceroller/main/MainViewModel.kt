@@ -36,6 +36,12 @@ class MainViewModel @Inject constructor (
         }
     }
 
+    /**
+     * Where the call to get a random number actually takes place
+     * @param valuesToReturn the number of separate values that will be returned
+     * @param min the minimum random number
+     * @param max the maximum random number
+     */
     private fun rollDice(
         valuesToReturn: Int,
         min: Int,
@@ -53,6 +59,7 @@ class MainViewModel @Inject constructor (
                     result = response.body() ?: 0,
                     loading = false)
             } else {
+                //setting networkError to true displays a Toast message
                 state = state.copy(
                     networkError = true,
                     loading = false)

@@ -60,7 +60,7 @@ fun MainContent(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        DiceImage(side = state.result)
+        DiceImage(displayedSide = state.result)
         RollButton(
             tapRoll = { tapRoll() },
             loading = state.loading
@@ -68,11 +68,14 @@ fun MainContent(
     }
 }
 
+/**
+ * @param displayedSide the side of the die that is currently facing up
+ */
 @Composable
-fun DiceImage(side: Int) {
+fun DiceImage(displayedSide: Int) {
     @DrawableRes val imageId: Int
     val description: String
-    when (side) {
+    when (displayedSide) {
         1 -> {
             imageId = R.drawable.dice_1
             description = "Dice 1"
