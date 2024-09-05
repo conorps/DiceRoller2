@@ -15,12 +15,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            DiceRollerTheme {
-                MainScreen(
-                    viewModel = viewModel,
-                    context = this
-                )
-            }
+            DiceRollerTheme { MainScreen(viewModel = viewModel) }
         }
     }
 }

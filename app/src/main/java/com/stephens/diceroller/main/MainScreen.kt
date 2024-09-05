@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,10 +28,7 @@ import com.stephens.diceroller.R
 import com.stephens.diceroller.ui.theme.DiceRollerTheme
 
 @Composable
-fun MainScreen(
-    viewModel: MainViewModel,
-    context: Context
-) {
+fun MainScreen(viewModel: MainViewModel) {
     Column (
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -43,7 +41,7 @@ fun MainScreen(
         )
         when {
             uiState.value.networkError -> {
-                Toast.makeText(context, "Network Error", Toast.LENGTH_LONG).show()
+                Toast.makeText(LocalContext.current, "Network Error", Toast.LENGTH_LONG).show()
                 viewModel.postAction(MainAction.ClearErrors)
             }
         }
