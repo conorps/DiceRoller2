@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stephens.diceroller.api.RandomApi
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -47,22 +48,28 @@ class MainViewModel @Inject constructor (
         min: Int,
         max: Int
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             state = state.copy(loading = true)
-            val response = api.getRandomNumber(
-                num = valuesToReturn.toString(),
-                min = min.toString(),
-                max = max.toString()
-            )
-            if (response.isSuccessful) {
-                state = state.copy(
-                    result = response.body() ?: 0,
-                    loading = false)
-            } else {
-                //setting networkError to true displays a Toast message
-                state = state.copy(
-                    networkError = true,
-                    loading = false)
+            try {
+                val response = api.getRandomNumber(
+                    num = valuesToReturn.toString(),
+                    min = min.toString(),
+                    max = max.toString()
+                )
+                if (response.isSuccessful) {
+                    state = state.copy(
+                        result = response.body() ?: 0,
+                        loading = false
+                    )
+                } else {
+                    //setting networkError to true displays a Toast message
+                    state = state.copy(
+                        networkError = true,
+                        loading = false
+                    )
+                }
+            } catch (e: Exception) {
+                state = state.copy(networkError = true, loading = false)
             }
         }
     }
