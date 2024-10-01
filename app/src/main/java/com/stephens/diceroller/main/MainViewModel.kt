@@ -3,6 +3,7 @@ package com.stephens.diceroller.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stephens.diceroller.api.RandomApi
+import com.stephens.diceroller.data.RandomRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,8 +12,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor (
-    private val api: RandomApi
+class MainViewModel @Inject constructor(
+    private val repository: RandomRepository
 ) : ViewModel() {
     private var state = MainState()
         private set(value) {
@@ -23,54 +24,38 @@ class MainViewModel @Inject constructor (
     val stateFlow = _stateFlow.asStateFlow()
 
     fun postAction(action: MainAction) {
-        when(action) {
+        when (action) {
             MainAction.TapRoll ->
                 rollDice(
                     valuesToReturn = 1,
                     min = 1,
                     max = 6
-            )
+                )
+
             MainAction.ClearErrors ->
                 state = state.copy(
-                networkError = false
-            )
+                    networkError = false
+                )
         }
     }
 
-    /**
-     * Where the call to get a random number actually takes place
-     * @param valuesToReturn the number of separate values that will be returned
-     * @param min the minimum random number
-     * @param max the maximum random number
-     */
     private fun rollDice(
         valuesToReturn: Int,
         min: Int,
         max: Int
     ) {
+        state = state.copy(loading = true)
         viewModelScope.launch(Dispatchers.IO) {
-            state = state.copy(loading = true)
-            try {
-                val response = api.getRandomNumber(
-                    num = valuesToReturn.toString(),
-                    min = min.toString(),
-                    max = max.toString()
+            val result = repository.rollDice(valuesToReturn, min, max)
+            state = if (result == 0) {
+                state.copy(
+                    loading = false,
+                    networkError = true
                 )
-                if (response.isSuccessful) {
-                    state = state.copy(
-                        result = response.body() ?: 0,
-                        loading = false
-                    )
-                } else {
-                    //setting networkError to true displays a Toast message
-                    state = state.copy(
-                        networkError = true,
-                        loading = false
-                    )
-                }
-            } catch (e: Exception) {
-                state = state.copy(networkError = true, loading = false)
-            }
+            } else state.copy(
+                result = result,
+                loading = false
+            )
         }
     }
 }
