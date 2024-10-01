@@ -2,11 +2,10 @@ package com.stephens.diceroller
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,9 +44,9 @@ fun DiceRollerAppComposable(
     navController: NavHostController = rememberNavController()
 ) {
     val topLevelRoutes = listOf(
-        //TODO: Implement History and Settings screens
-        //TopLevelRoute(stringResource(R.string.history), History, Icons.Filled.DateRange),
+        //TODO: Implement Settings screens
         TopLevelRoute(stringResource(R.string.home), Home, Icons.Default.Home),
+        TopLevelRoute(stringResource(R.string.history), History, Icons.Filled.DateRange),
         //TopLevelRoute(stringResource(R.string.settings), Settings, Icons.Default.Settings)
     )
     Scaffold(
@@ -79,7 +78,6 @@ fun DiceRollerAppComposable(
             startDestination = Home,
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
         ) {
             composable<Home> {
@@ -89,7 +87,7 @@ fun DiceRollerAppComposable(
                 SettingsScreen()
             }
             composable<History> {
-                HistoryScreen(emptyList())
+                HistoryScreen(viewModel)
             }
         }
     }

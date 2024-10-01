@@ -2,24 +2,30 @@ package com.stephens.diceroller.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.stephens.diceroller.api.RandomApi
+import com.stephens.diceroller.data.HistoryRepository
 import com.stephens.diceroller.data.RandomRepository
+import com.stephens.diceroller.data.RollResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val repository: RandomRepository
+    private val repository: RandomRepository,
+    private val historyRepository: HistoryRepository
 ) : ViewModel() {
     private var state = MainState()
         private set(value) {
             field = value
             _stateFlow.tryEmit(value)
         }
+    val historyStateFlow = historyRepository.getHistory().flowOn(Dispatchers.IO)
+
     private val _stateFlow = MutableStateFlow(state)
     val stateFlow = _stateFlow.asStateFlow()
 
@@ -31,6 +37,12 @@ class MainViewModel @Inject constructor(
                     min = 1,
                     max = 6
                 )
+
+            MainAction.TapClearHistory -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    historyRepository.clearHistory()
+                }
+            }
 
             MainAction.ClearErrors ->
                 state = state.copy(
@@ -47,15 +59,29 @@ class MainViewModel @Inject constructor(
         state = state.copy(loading = true)
         viewModelScope.launch(Dispatchers.IO) {
             val result = repository.rollDice(valuesToReturn, min, max)
-            state = if (result == 0) {
-                state.copy(
+            if (result == 0) {
+                state = state.copy(
                     loading = false,
                     networkError = true
                 )
-            } else state.copy(
-                result = result,
-                loading = false
-            )
+            } else {
+                state = state.copy(
+                    result = result,
+                    loading = false
+                )
+                insertResultInHistory(result, max)
+            }
+        }
+    }
+
+    private fun insertResultInHistory(result: Int, sides: Int) {
+        val rollResult = RollResult(
+            time = Calendar.getInstance().timeInMillis,
+            result = result,
+            sides = sides
+        )
+        viewModelScope.launch(Dispatchers.IO){
+            historyRepository.insertResult(rollResult)
         }
     }
 }
