@@ -8,6 +8,5 @@ data class MainState (
 
 sealed class MainAction {
     data object TapRoll : MainAction()
-    data object TapClearHistory: MainAction()
     data object ClearErrors : MainAction()
 }
