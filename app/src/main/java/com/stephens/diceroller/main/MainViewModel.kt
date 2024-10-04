@@ -9,7 +9,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
@@ -24,7 +23,6 @@ class MainViewModel @Inject constructor(
             field = value
             _stateFlow.tryEmit(value)
         }
-    val historyStateFlow = historyRepository.getHistory().flowOn(Dispatchers.IO)
 
     private val _stateFlow = MutableStateFlow(state)
     val stateFlow = _stateFlow.asStateFlow()
@@ -37,12 +35,6 @@ class MainViewModel @Inject constructor(
                     min = 1,
                     max = 6
                 )
-
-            MainAction.TapClearHistory -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    historyRepository.clearHistory()
-                }
-            }
 
             MainAction.ClearErrors ->
                 state = state.copy(

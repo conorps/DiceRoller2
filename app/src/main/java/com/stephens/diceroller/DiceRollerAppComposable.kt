@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -27,7 +26,6 @@ import androidx.navigation.compose.rememberNavController
 import com.stephens.diceroller.common.TopLevelRoute
 import com.stephens.diceroller.history.HistoryScreen
 import com.stephens.diceroller.main.MainScreen
-import com.stephens.diceroller.main.MainViewModel
 import com.stephens.diceroller.settings.SettingsScreen
 import kotlinx.serialization.Serializable
 
@@ -39,10 +37,7 @@ data object Settings
 data object History
 
 @Composable
-fun DiceRollerAppComposable(
-    viewModel: MainViewModel = viewModel(),
-    navController: NavHostController = rememberNavController()
-) {
+fun DiceRollerAppComposable(navController: NavHostController = rememberNavController()) {
     val topLevelRoutes = listOf(
         //TODO: Implement Settings screens
         TopLevelRoute(stringResource(R.string.home), Home, Icons.Default.Home),
@@ -81,13 +76,13 @@ fun DiceRollerAppComposable(
                 .padding(innerPadding)
         ) {
             composable<Home> {
-                MainScreen(viewModel)
+                MainScreen()
             }
             composable<Settings>{
                 SettingsScreen()
             }
             composable<History> {
-                HistoryScreen(viewModel)
+                HistoryScreen()
             }
         }
     }
