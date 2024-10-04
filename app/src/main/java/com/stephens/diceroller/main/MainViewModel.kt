@@ -31,7 +31,6 @@ class MainViewModel @Inject constructor(
         when (action) {
             MainAction.TapRoll ->
                 rollDice(
-                    valuesToReturn = 1,
                     min = 1,
                     max = 6
                 )
@@ -44,10 +43,14 @@ class MainViewModel @Inject constructor(
     }
 
     private fun rollDice(
-        valuesToReturn: Int,
+        valuesToReturn: Int = 1,
         min: Int,
         max: Int
     ) {
+        if (min >= max) {
+            //TODO: Show error state
+            return
+        }
         state = state.copy(loading = true)
         viewModelScope.launch(Dispatchers.IO) {
             val result = repository.rollDice(valuesToReturn, min, max)
@@ -66,14 +69,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun insertResultInHistory(result: Int, sides: Int) {
+    private suspend fun insertResultInHistory(result: Int, sides: Int) {
         val rollResult = RollResult(
             time = Calendar.getInstance().timeInMillis,
             result = result,
             sides = sides
         )
-        viewModelScope.launch(Dispatchers.IO){
-            historyRepository.insertResult(rollResult)
-        }
+        historyRepository.insertResult(rollResult)
     }
 }

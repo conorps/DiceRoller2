@@ -1,6 +1,8 @@
 package com.stephens.diceroller.main
 
 import com.stephens.diceroller.api.RandomApi
+import com.stephens.diceroller.data.HistoryDao
+import com.stephens.diceroller.data.HistoryRepository
 import com.stephens.diceroller.data.RandomRepository
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -16,6 +18,7 @@ import retrofit2.Response
 
 class MainViewModelTest {
     private val randomApi: RandomApi = mockk()
+    private val historyDao: HistoryDao = mockk()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
@@ -26,7 +29,7 @@ class MainViewModelTest {
         } returns Response.success(5)
 
         val randomRepo = RandomRepository(randomApi)
-        val viewModel = MainViewModel(randomRepo)
+        val viewModel = MainViewModel(randomRepo, HistoryRepository(historyDao))
         viewModel.postAction(MainAction.TapRoll)
         var rollResult = 0
         viewModel.stateFlow.take(1).collect {
@@ -44,7 +47,7 @@ class MainViewModelTest {
         } returns Response.success(2)
 
         val randomRepo = RandomRepository(randomApi)
-        val viewModel = MainViewModel(randomRepo)
+        val viewModel = MainViewModel(randomRepo, HistoryRepository(historyDao))
         viewModel.postAction(MainAction.TapRoll)
         var rollResult = 0
         viewModel.stateFlow.take(1).collect {
